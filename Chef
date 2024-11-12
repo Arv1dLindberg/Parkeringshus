@@ -1,0 +1,59 @@
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+       
+        Parkering parkering = new Parkering();
+       
+
+          Chef chef = new Chef("Chehfen", "Chefen");
+
+
+
+
+        chef.Parkera(parkering);
+       
+        chef.Parkera(parkering);
+    }
+}
+
+public class Parkering
+{
+    public bool Ledig { get; private set; } = true;
+
+    public void Parkera()
+    {
+        if (Ledig)
+        {
+            Console.WriteLine("Parkeringsplatsen är ledig. Parkering lyckades!");
+            Ledig = false;
+     
+        }
+    }
+
+    public void LämnaParkering()
+    {
+        Console.WriteLine("Parkeringsplatsen är nu ledig.");
+        Ledig = true;
+    }
+}
+
+public class Chef
+{
+    public string Namn { get; }
+    public string Titel { get; }
+
+    public Chef(string namn, string titel)
+    {
+        Namn = namn;
+        Titel = titel;
+    }
+
+    public void Parkera(Parkering parkering)
+    {
+        Console.WriteLine($"{Titel} {Namn} försöker parkera...");
+        parkering.Parkera();
+    }
+}
