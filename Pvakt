@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+
+class Bil
+{
+    public string Registreringsnummer { get; }
+    public DateTime ParkeradTid { get; private set; }
+
+    public Bil(string registreringsnummer)
+    {
+        Registreringsnummer = registreringsnummer;
+        ParkeradTid = DateTime.Now;
+    }
+
+    public void Parkerad()
+    {
+        ParkeradTid = DateTime.Now;
+    }
+
+    public TimeSpan TidenParkerad()
+    {
+        return DateTime.Now - ParkeradTid;
+    }
+}
+
+class Parkeringsvakt
+{
+    private const int MaxParkeradTid = 2;
+    private const int BöterBelopp = 500;
+
+    public void KontrolleraBil(Bil bil)
+    {
+        TimeSpan parkeradTid = bil.TidenParkerad();
+        if (parkeradTid.TotalHours > MaxParkeradTid)
+        {
+            Console.WriteLine($"Böter utfärdat för bil med registreringsnummer {bil.Registreringsnummer}: {500} kr.");
+        }
+        else
+        {
+            Console.WriteLine($"Bil med registreringsnummer {bil.Registreringsnummer} har parkerat i {parkeradTid.TotalHours:F2} timmar. 500.");
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+       
+        Bil bil1 = new Bil("ABC123");
+       
+       
+        System.Threading.Thread.Sleep(1000);
+
+       
+        Parkeringsvakt vakt = new Parkeringsvakt();
+        vakt.KontrolleraBil(bil1);
+
+       
+        System.Threading.Thread.Sleep(7200000);
+       
+        vakt.KontrolleraBil(bil1);
+    }
+}
