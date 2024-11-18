@@ -1,0 +1,102 @@
+using System;
+using System.Collections.Generic;
+
+public class ParkingSpace
+{
+    public string SpaceId { get; }
+    public bool IsOccupied { get; private set; }
+
+    public ParkingSpace(string spaceId)
+    {
+        SpaceId = spaceId;
+        IsOccupied = false;
+    }
+
+    public void ParkVehicle()
+    {
+        if (!IsOccupied)
+        {
+            IsOccupied = true;
+            Console.WriteLine($"Vehicle parked in space {SpaceId}.");
+        }
+        else
+        {
+            Console.WriteLine($"Space {SpaceId} is already occupied.");
+        }
+    }
+
+    public void RemoveVehicle()
+    {
+        if (IsOccupied)
+        {
+            IsOccupied = false;
+            Console.WriteLine($"Vehicle removed from space {SpaceId}.");
+        }
+        else
+        {
+            Console.WriteLine($"Space {SpaceId} is already empty.");
+        }
+    }
+}
+
+public class ParkingAttendant
+{
+    private List<ParkingSpace> _parkingSpaces;
+
+    public ParkingAttendant(List<ParkingSpace> parkingSpaces)
+    {
+        _parkingSpaces = parkingSpaces;
+    }
+
+    public void CheckSpaceAvailability(string spaceId)
+    {
+        var space = _parkingSpaces.Find(s => s.SpaceId == spaceId);
+        if (space != null)
+        {
+            if (space.IsOccupied)
+            {
+                Console.WriteLine($"Space {spaceId} is occupied.");
+            }
+            else
+            {
+                Console.WriteLine($"Space {spaceId} is available.");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Space {spaceId} does not exist.");
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Skapa parkeringsplatser
+        var parkingSpaces = new List<ParkingSpace>
+        {
+            new ParkingSpace("A1"),
+            new ParkingSpace("A2"),
+            new ParkingSpace("B1"),
+            new ParkingSpace("B2")
+        };
+
+        ParkingAttendant attendant = new ParkingAttendant(parkingSpaces);
+
+        // Kontrollera tillgänglighet
+        attendant.CheckSpaceAvailability("A1");
+        
+        // Parkera ett fordon
+        parkingSpaces[0].ParkVehicle();
+        
+        // Kontrollera tillgänglighet igen
+        attendant.CheckSpaceAvailability("A1");
+
+        // Ta bort fordonet
+        parkingSpaces[0].RemoveVehicle();
+        
+        // Kontrollera tillgänglighet igen
+        attendant.CheckSpaceAvailability("A1");
+    }
+}
