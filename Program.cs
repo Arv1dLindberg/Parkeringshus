@@ -24,7 +24,7 @@ namespace Parkeringshus1
 
         static int vehiclesFined = 0; // Bötfällda fordon
         static double fineAmount = 0;
-        static Random random = new Random(); // Random number generator för fines
+        static Random random = new Random();
 
         static void Main(string[] args)
         {
@@ -126,10 +126,10 @@ namespace Parkeringshus1
 
             Console.WriteLine("\nPress Enter to continue...");
             Console.ReadLine();
-            VehicleColor(vehicleType, registrationNumber);
+            VehicleProperties(vehicleType, registrationNumber);
         }
 
-        static void VehicleColor(string vehicleType, string registrationNumber) // Här kan man skriva in sin färg på sitt fordon
+        static void VehicleProperties(string vehicleType, string registrationNumber) // Här kan man skriva in sin färg på sitt fordon
         {
             Console.Clear();
             Console.WriteLine("The color of your vehicle:");
@@ -137,10 +137,38 @@ namespace Parkeringshus1
 
             Console.WriteLine("\nPress Enter to continue...");
             Console.ReadLine();
-            ParkingDuration(vehicleType, registrationNumber, color);
+
+            if (vehicleType == "Car")
+            {
+                Console.Clear();
+                Console.WriteLine("Is your car electric? (y/n):");
+                char electricInput = Console.ReadKey().KeyChar;
+                bool isElectricCar = electricInput == 'y' || electricInput == 'Y';
+                ParkingDuration(vehicleType, registrationNumber, color, isElectricCar: isElectricCar);
+            }
+            else if (vehicleType == "Motorcycle")
+            {
+                Console.Clear();
+                Console.WriteLine("What is the brand of your motorcycle?");
+                string brand = Console.ReadLine();
+                ParkingDuration(vehicleType, registrationNumber, color, motorcycleBrand: brand);
+            }
+            else if (vehicleType == "Bus")
+            {
+                Console.WriteLine("How many passengers does your bus have?");
+                if (int.TryParse(Console.ReadLine(), out int passengers))
+                {
+                    ParkingDuration(vehicleType, registrationNumber, color, busPassengers: passengers);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input for passengers. Please enter a number.");
+                    VehicleProperties(vehicleType, registrationNumber);
+                }
+            }
         }
 
-        static void ParkingDuration(string vehicleType, string registrationNumber, string color)
+        static void ParkingDuration(string vehicleType, string registrationNumber, string color, bool isElectricCar = false, string motorcycleBrand = "", int busPassengers = 0)
         {
             Console.Clear();
             Console.WriteLine("How long do you wish to park here:");
@@ -154,16 +182,17 @@ namespace Parkeringshus1
                 {
                     Vehicle vehicle = new Vehicle(vehicleType, registrationNumber, color, duration, vehicleSize);
 
+                    // Lägger till fordon i platser och justera återstående utrymme
                     parkingSlots[slotIndex].Add(vehicle);
                     slotSpaces[slotIndex] -= vehicleSize;
 
-                    if (vehicleSize > 1.0) // för bussar
+                    if (vehicleSize > 1.0) // För bussar
                     {
                         slotSpaces[slotIndex + 1] -= (vehicleSize - 1.0);
-                        parkingSlots[slotIndex + 1].Add(vehicle); // lägger till bussen i andra platsen
+                        parkingSlots[slotIndex + 1].Add(vehicle); // Lägger till bussen på nästa plats
                         Console.WriteLine($"{vehicleType} parked in slots {slotIndex + 1} and {slotIndex + 2}.");
                     }
-                    else
+                    else // För mc och bilar
                     {
                         Console.WriteLine($"{vehicleType} parked in slot {slotIndex + 1}.");
                     }
@@ -189,22 +218,29 @@ namespace Parkeringshus1
         {
             for (int i = 0; i < slotSpaces.Count; i++)
             {
-                // För bussar
-                if (size > 1.0)
+                if (size > 1.0) // För bussar
                 {
                     if (i + 1 < slotSpaces.Count && slotSpaces[i] >= 1.0 && slotSpaces[i + 1] >= size - 1.0)
                     {
-                        slotIndex = i; 
+                        slotIndex = i;
                         return true;
                     }
                 }
-                else if (size <= slotSpaces[i]) // För bilar och mc
+                else if (size == 0.5) // För motorcyklar
+                {
+                    if (slotSpaces[i] >= 0.5)
+                    {
+                        slotIndex = i;
+                        return true;
+                    }
+                }
+                else if (size <= slotSpaces[i]) // För bilar
                 {
                     slotIndex = i;
                     return true;
                 }
             }
-            slotIndex = -1; // ingen plats hittat
+            slotIndex = -1; // ingen plats hittad
             return false;
         }
 
@@ -269,12 +305,18 @@ namespace Parkeringshus1
             {
                 await Task.Delay(1000);
 
+                HashSet<Vehicle> checkedVehicles = new HashSet<Vehicle>();
+
                 foreach (var slot in parkingSlots)
                 {
                     if (slot != null) // ser till att platserna inte är null
                     {
                         foreach (var vehicle in slot)
                         {
+
+                            if (checkedVehicles.Contains(vehicle))
+                                continue;
+
                             if (vehicle.Duration > 0)
                             {
                                 vehicle.Duration--;
@@ -283,6 +325,8 @@ namespace Parkeringshus1
                                 else if (vehicle.VehicleType1 == "Motorcycle") totalMotorcycleSeconds++;
                                 else if (vehicle.VehicleType1 == "Bus") totalBusSeconds++;
                             }
+
+                            checkedVehicles.Add(vehicle);
                         }
                     }
                 }
@@ -304,13 +348,14 @@ namespace Parkeringshus1
 
                     string payingRegNumber = Console.ReadLine();
 
-                    // Kicka b för att gå tillbaka till main menyn
+                    // Gå tillbaka till main menyn
                     if (payingRegNumber.ToLower() == "b")
                     {
                         MainMenu();
                         return;
                     }
 
+                    // Söker efter fordon i parkeringsplatser
                     foreach (var slot in parkingSlots)
                     {
                         payingVehicle = slot.FirstOrDefault(vehicle => vehicle.RegistrationNumber1 == payingRegNumber);
@@ -324,8 +369,14 @@ namespace Parkeringshus1
                     if (payingVehicle == null)
                     {
                         Console.WriteLine("No vehicle found with the given registration number.");
-                        Console.WriteLine("\nPress Enter to try again.");
-                        Console.ReadLine();
+                        Console.WriteLine("\nPress Enter to try again or type B to go back to the Main Menu.");
+                        string retryInput = Console.ReadLine();
+
+                        if (retryInput.ToLower() == "b")
+                        {
+                            MainMenu();
+                            return;
+                        }
                     }
                 }
 
@@ -337,19 +388,36 @@ namespace Parkeringshus1
                     Console.WriteLine($"Registration Number: {payingVehicle.RegistrationNumber1}");
                     Console.WriteLine($"Color: {payingVehicle.Color}");
 
-                    // kalkylera totala avgiften
-                    double fineAmount = payingVehicle.HasBeenFined ? 500 : 0; // Inkludera bötern om fordondet har blivit bötfälld eller bara 0 om den inte är bötfälld
-                    double durationPayment = payingVehicle.Duration * 1.5; // Betalning baserad på parkeringsavgiften
-                    double amountToPay = fineAmount + durationPayment; // Totala avgiften
+                    // Beräkna den totala avgiften
+                    DateTime currentTime = DateTime.Now;
+                    TimeSpan actualParkedTime = currentTime - payingVehicle.ParkingTimestamp;
+                    int actualParkedSeconds = (int)actualParkedTime.TotalSeconds;
 
-                    Console.WriteLine($"The amount to pay is: {amountToPay} SEK");
+                    double durationPayment = actualParkedSeconds * 1.5; // Betalning baserad på de parkerade sekunderna
+                    double fineAmount = payingVehicle.Duration <= 0 ? 500 : 0; // Inkludera böter om fordonet har överskridit parkeringstiden
+
+                    double amountToPay = fineAmount + durationPayment; // Totalt belopp
+
+                    Console.WriteLine($"The amount to pay is: {amountToPay:F2} SEK");
                     Console.WriteLine("Please enter the amount to confirm payment:");
 
                     string paymentInput = Console.ReadLine();
                     if (double.TryParse(paymentInput, out double payment) && payment == amountToPay)
                     {
                         validInput = true;
-                        vehicleSlot.Remove(payingVehicle); // Remove the vehicle from the parking slot
+
+                        // Frigör utrymmet i parkeringsplatsen
+                        double vehicleSize = payingVehicle.Size;
+                        int slotIndex = Array.FindIndex(parkingSlots, slot => slot == vehicleSlot);
+                        slotSpaces[slotIndex] += vehicleSize;
+                        vehicleSlot.Remove(payingVehicle);
+
+                        if (vehicleSize > 1.0 && slotIndex + 1 < slotSpaces.Count)
+                        {
+                            slotSpaces[slotIndex + 1] += (vehicleSize - 1.0);
+                            parkingSlots[slotIndex + 1].Remove(payingVehicle);
+                        }
+
                         Console.Clear();
                         Console.WriteLine("Payment successful! You are now checked out. Have a nice day!");
                         Console.WriteLine("\nPress Enter to return to the Main Menu.");
@@ -365,6 +433,7 @@ namespace Parkeringshus1
                 }
             }
         }
+
 
 
         static void ManagerLogin()
@@ -437,13 +506,13 @@ namespace Parkeringshus1
         {
             Console.Clear();
 
-            
+
             Task.Run(() =>
             {
                 while (true)
                 {
                     Thread.Sleep(10000); // väntar 10 sek
-                    IssueParkingFines(); 
+                    IssueParkingFines();
                 }
             });
 
@@ -503,8 +572,8 @@ namespace Parkeringshus1
                         vehiclesFined++;
                         fineAmount += 500;
                         vehicle.HasBeenFined = true; // markerar den bötfällda fordonet
-                                                     
-                        Console.Clear(); // Displayar fine meddelandet
+
+                        Console.Clear(); // Displayar böter meddelandet
                         Console.WriteLine($"[FINE ISSUED] Vehicle: {vehicle.RegistrationNumber1}, Fine: 500 SEK");
 
                         // Pausa i 2 sek så man kan see meddlendadet
@@ -522,17 +591,28 @@ namespace Parkeringshus1
             public string Color { get; }
             public int Duration { get; set; }
             public double Size { get; } // Storlek: 0,5 för motorcyklar, 1 för bilar och 2 för bussar
+            public int OriginalDuration { get; }
             public bool HasBeenFined { get; set; }
+            public bool IsElectricCar { get; }
+            public string MotorcycleBrand { get; }
+            public int BusPassengers { get; }
+            public DateTime ParkingTimestamp { get; }
 
 
-            public Vehicle(string vehicleType, string registrationNumber, string color, int duration, double size)
+            public Vehicle(string vehicleType, string registrationNumber, string color, int duration, double size, bool isElectricCar = false, string motorcycleBrand = "", int busPassengers = 0)
             {
                 VehicleType1 = vehicleType;
                 RegistrationNumber1 = registrationNumber;
                 Color = color;
                 Duration = duration;
                 Size = size;
+                OriginalDuration = duration;
                 HasBeenFined = false;
+                IsElectricCar = isElectricCar;
+                MotorcycleBrand = motorcycleBrand;
+                BusPassengers = busPassengers;
+                ParkingTimestamp = DateTime.Now;
+
             }
         }
     }
