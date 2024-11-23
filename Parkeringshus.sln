@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parkeringshus", "Parkeringshus.csproj", "{F46058A0-1AD7-458F-AEFA-08D72649707B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parkeringshus.Tester", "..\Parkeringshus.Tester\Parkeringshus.Tester.csproj", "{878BF0FA-D8C6-43DD-B5B1-838E4F1A7854}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parkeringshus.Tests", "..\Parkeringshus.Tests\Parkeringshus.Tests.csproj", "{7197E1D4-8A78-4E2E-AC0D-EEE578D51AEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{F46058A0-1AD7-458F-AEFA-08D72649707B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F46058A0-1AD7-458F-AEFA-08D72649707B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F46058A0-1AD7-458F-AEFA-08D72649707B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{878BF0FA-D8C6-43DD-B5B1-838E4F1A7854}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{878BF0FA-D8C6-43DD-B5B1-838E4F1A7854}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{878BF0FA-D8C6-43DD-B5B1-838E4F1A7854}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{878BF0FA-D8C6-43DD-B5B1-838E4F1A7854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7197E1D4-8A78-4E2E-AC0D-EEE578D51AEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7197E1D4-8A78-4E2E-AC0D-EEE578D51AEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7197E1D4-8A78-4E2E-AC0D-EEE578D51AEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7197E1D4-8A78-4E2E-AC0D-EEE578D51AEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
